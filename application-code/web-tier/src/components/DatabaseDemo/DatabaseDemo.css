@@ -1,0 +1,45 @@
+#transactions {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+#transactions td, #transactions th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+#title {
+  color: var(--text-primary);
+}
+
+#colHeader td {
+  color: var(--text-secondary);
+}
+
+#transactions tr:nth-child(even) { background-color: #faf9f6; }
+#transactions tr:hover { background-color: #fff4ed; }
+
+#transactions th {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  text-align: left;
+  background-color: #f1f0eb;
+  color: var(--text-secondary);
+}
+
+thead,
+tbody {
+display: block;
+}
+
+tbody {
+height: 500px;
+overflow: auto;
+}
