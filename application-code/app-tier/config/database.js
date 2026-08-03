@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const logger = require('./logger');
 
 let pool;
