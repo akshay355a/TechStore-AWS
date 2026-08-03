@@ -1,11 +1,16 @@
+'use strict';
+
 const ecommerceService = require('./EcommerceService');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const { loadConfig } = require('./DbConfig');
+const { initializeDatabase, closeDatabase } = require('./config/database');
+const logger = require('./config/logger');
 
 const app = express();
-const port = 4000;
+let server;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -224,11 +229,83 @@ app.put('/orders/:id/status', authMiddleware, adminMiddleware, (req, res) => {
 // START SERVER
 // ══════════════════════════════════════════════
 
-ecommerceService.seedDefaultData().then(() => {
-    app.listen(port, () => {
-        console.log(`SERVER:   TechStore API listening at http://localhost:${port}`);
-        console.log(`PRODUCTS: GET  http://localhost:${port}/products`);
-        console.log(`AUTH:     POST http://localhost:${port}/auth/login`);
-        console.log(`HEALTH:   GET  http://localhost:${port}/health`);
+function getPort() {
+    const port = Number(process.env.PORT || 4000);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        throw new Error('PORT must be an integer from 1 to 65535');
+    }
+    return port;
+}
+
+function listen(port) {
+    return new Promise((resolve, reject) => {
+        server = app.listen(port, '0.0.0.0');
+        server.once('listening', resolve);
+        server.once('error', reject);
     });
+}
+
+async function startServer() {
+    const config = await loadConfig();
+    await initializeDatabase(config);
+    ecommerceService.initialize({ jwtSecret: config.jwtSecret });
+
+    const port = getPort();
+    await listen(port);
+    logger.info('✓ Server started');
+    logger.info('✓ Listening port', { port });
+}
+
+let shutdownStarted = false;
+async function shutdown(signal) {
+    if (shutdownStarted) return;
+    shutdownStarted = true;
+    logger.info('Application shutdown started', { signal });
+
+    if (server) {
+        await new Promise(resolve => {
+            let completed = false;
+            const finish = () => {
+                if (completed) return;
+                completed = true;
+                clearTimeout(forceCloseTimer);
+                resolve();
+            };
+            const forceCloseTimer = setTimeout(() => {
+                logger.error('HTTP server shutdown timed out; closing active connections');
+                server.closeAllConnections();
+                finish();
+            }, 8000);
+            forceCloseTimer.unref();
+
+            server.close(error => {
+                if (error) {
+                    logger.error('HTTP server shutdown failed', { error });
+                }
+                finish();
+            });
+        });
+    }
+
+    try {
+        await closeDatabase();
+        logger.info('Application shutdown completed', { signal });
+        process.exit(0);
+    } catch (error) {
+        logger.error('Database shutdown failed', { error });
+        process.exit(1);
+    }
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+startServer().catch(async error => {
+    logger.error('Application startup failed', { error });
+    try {
+        await closeDatabase();
+    } catch (closeError) {
+        logger.error('Database cleanup after startup failure failed', { error: closeError });
+    }
+    process.exit(1);
 });

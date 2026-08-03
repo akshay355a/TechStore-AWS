@@ -1,10 +1,16 @@
 {
   "name": "aws-3tier-app-layer",
   "version": "1.0.0",
-  "description": "",
+  "description": "TechStore production application tier",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "start:pm2": "pm2 start ecosystem.config.js --env production",
+    "seed:admin": "node scripts/seed-admin.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "repository": {
     "type": "git",
@@ -18,6 +24,7 @@
   },
   "homepage": "https://github.com/awsshivs/ab3-web-app-backend#readme",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1101.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",

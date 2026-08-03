@@ -6,13 +6,14 @@ node_modules/
 build/
 dist/
 
-# Environment
+# Environment and credentials
 .env
-.env.local
-.env.production
+.env.*
+.aws/
+*.pem
+*.key
 
-# Local data (JSON mock database)
-application-code/app-tier/data/
+
 
 # OS files
 .DS_Store

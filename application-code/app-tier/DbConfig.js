@@ -1,6 +1,11 @@
+'use strict';
+
+const { loadSecrets } = require('./config/secrets');
+
+async function loadConfig() {
+    return loadSecrets();
+}
+
 module.exports = Object.freeze({
-    DB_HOST : '',
-    DB_USER : '',
-    DB_PWD : '',
-    DB_DATABASE : ''
+    loadConfig
 });

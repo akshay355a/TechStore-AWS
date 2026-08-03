@@ -52,6 +52,3 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Seed default admin user (password: admin123)
-INSERT INTO users (name, email, password, role) VALUES
-('Admin', 'admin@techstore.com', '$2a$10$PLACEHOLDER_HASH', 'admin');
