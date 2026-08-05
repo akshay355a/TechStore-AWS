@@ -97,12 +97,57 @@ async function loadAdminSecret() {
     return config;
 }
 
+function isProduction() {
+    return process.env.NODE_ENV === 'production';
+}
+
+function loadLocalDatabaseConfig() {
+    const host = process.env.DB_HOST;
+    const username = process.env.DB_USER;
+    const password = process.env.DB_PASSWORD;
+    const database = process.env.DB_NAME;
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!host || !username || !database) {
+        throw new Error(
+            'Local development requires DB_HOST, DB_USER, and DB_NAME in the environment. ' +
+            'Copy .env.example to .env and fill in your local values.'
+        );
+    }
+    if (!jwtSecret) {
+        throw new Error(
+            'JWT_SECRET is required. Set it in your .env file.'
+        );
+    }
+
+    const port = Number(process.env.DB_PORT || 3306);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        throw new Error('DB_PORT must be an integer from 1 to 65535');
+    }
+
+    logger.info('✓ Using local database configuration (development mode)');
+    return Object.freeze({ host, username, password: password || '', database, port, jwtSecret });
+}
+
+function loadLocalAdminConfig() {
+    return Object.freeze({
+        email: process.env.ADMIN_EMAIL || 'admin@techstore.com',
+        password: process.env.ADMIN_PASSWORD || 'Admin123',
+        name: process.env.ADMIN_NAME || 'Administrator'
+    });
+}
+
 async function loadSecrets() {
+    if (!isProduction()) {
+        return loadLocalDatabaseConfig();
+    }
     return loadDatabaseSecret({ requireJwtSecret: true });
 }
 
 module.exports = Object.freeze({
     loadSecrets,
     loadDatabaseSecret,
-    loadAdminSecret
+    loadAdminSecret,
+    loadLocalAdminConfig,
+    isProduction
 });

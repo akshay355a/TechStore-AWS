@@ -74,8 +74,8 @@ async function initializeDatabase(config) {
     }
 
     const connectionLimit = getPositiveIntegerEnvironmentValue('DB_CONNECTION_LIMIT', 10);
-    const rdsCaBundle = loadRdsCaBundle();
-    const candidatePool = mysql.createPool({
+
+    const poolOptions = {
         host: config.host,
         user: config.username,
         password: config.password,
@@ -88,12 +88,18 @@ async function initializeDatabase(config) {
         acquireTimeout: 10000,
         charset: 'utf8mb4',
         timezone: 'Z',
-        multipleStatements: false,
-        ssl: {
+        multipleStatements: false
+    };
+
+    if (process.env.NODE_ENV === 'production') {
+        const rdsCaBundle = loadRdsCaBundle();
+        poolOptions.ssl = {
             ca: rdsCaBundle,
             rejectUnauthorized: true
-        }
-    });
+        };
+    }
+
+    const candidatePool = mysql.createPool(poolOptions);
 
     candidatePool.on('error', error => {
         logger.error('Unexpected database pool error', { error });

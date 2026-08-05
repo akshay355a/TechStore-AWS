@@ -1,7 +1,8 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
-const { loadDatabaseSecret, loadAdminSecret } = require('../config/secrets');
+const { loadDatabaseSecret, loadAdminSecret, loadLocalAdminConfig, isProduction } = require('../config/secrets');
+const { loadConfig } = require('../DbConfig');
 const { initializeDatabase, getPool, closeDatabase } = require('../config/database');
 const logger = require('../config/logger');
 
@@ -20,10 +21,18 @@ function query(sql, values) {
 }
 
 async function seedAdmin() {
-    const [databaseConfig, adminConfig] = await Promise.all([
-        loadDatabaseSecret({ requireJwtSecret: false }),
-        loadAdminSecret()
-    ]);
+    let databaseConfig;
+    let adminConfig;
+
+    if (isProduction()) {
+        [databaseConfig, adminConfig] = await Promise.all([
+            loadDatabaseSecret({ requireJwtSecret: false }),
+            loadAdminSecret()
+        ]);
+    } else {
+        databaseConfig = await loadConfig();
+        adminConfig = loadLocalAdminConfig();
+    }
 
     const passwordHash = await bcrypt.hash(adminConfig.password, BCRYPT_ROUNDS);
     await initializeDatabase(databaseConfig);
@@ -74,3 +83,4 @@ async function main() {
 }
 
 main();
+

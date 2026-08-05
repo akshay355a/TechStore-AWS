@@ -1,8 +1,74 @@
 # TechStore App Tier
 
-Production Node.js/Express application tier for EC2 behind an internal Application Load Balancer.
+Production Node.js/Express application tier for EC2 behind an internal Application Load Balancer.  
+Also supports local development on **Windows** and **Linux** without any AWS infrastructure.
 
-## Runtime requirements
+## Local Development (Windows / Linux)
+
+### Prerequisites
+
+- Node.js 20 or newer
+- A local MySQL 8 server (or Docker: `docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:8`)
+
+### Quick Start
+
+1. **Apply the database schema** to your local MySQL:
+
+   ```sh
+   mysql -u root -p < ../database/schema.sql
+   ```
+
+2. **Copy the environment template** and fill in your local values:
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   Edit `.env` and set `DB_USER`, `DB_PASSWORD`, etc. to match your local MySQL.
+
+3. **Install dependencies**:
+
+   ```sh
+   npm install
+   ```
+
+4. **Seed the admin user** (optional — reads `ADMIN_*` values from `.env`):
+
+   ```sh
+   npm run dev:seed
+   ```
+
+5. **Start the backend**:
+
+   ```sh
+   npm run dev
+   ```
+
+   The Express server starts on `http://localhost:4000` (or whichever `PORT` is in `.env`).
+
+6. **Start the React dev server** (in a separate terminal):
+
+   ```sh
+   cd ../web-tier
+   npm install
+   npm start
+   ```
+
+   The React dev server (port 3000) proxies `/api` requests to `localhost:4000` automatically.
+
+### How it works
+
+| Setting | Development | Production (EC2) |
+|---|---|---|
+| `NODE_ENV` | `development` (default) | `production` (set by PM2) |
+| Credentials source | `.env` file via `dotenv` | AWS Secrets Manager |
+| Database SSL | Disabled | RDS CA bundle + `rejectUnauthorized` |
+| Admin seeding | `npm run dev:seed` (reads `.env`) | `npm run seed:admin` (reads `cloudinv/admin`) |
+| Web tier serving | React dev server + proxy | Nginx serves `build/` |
+
+---
+
+## Runtime requirements (Production)
 
 - Node.js 20 or newer
 - Network access from the app-tier security group to RDS MySQL on port 3306
@@ -152,3 +218,6 @@ pm2 save
 - `../database/schema.sql` still selects the `ecommerce` database. Keep the secret's `database` value aligned with it.
 - The existing schema contains no `transactions` table. `TransactionService.js` remains for compatibility, but it requires that table if any legacy caller uses it.
 - Secret values are loaded once per process. Restart PM2 processes after rotating database credentials or `JWT_SECRET`; changing `JWT_SECRET` invalidates previously issued tokens.
+
+
+

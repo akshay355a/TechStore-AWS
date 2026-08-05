@@ -1,5 +1,24 @@
 const API_BASE = '/api';
 
+// MySQL returns DECIMAL columns as strings; coerce to numbers so
+// components can safely call .toFixed() without parseFloat() everywhere.
+function coerceNumbers(obj) {
+    if (Array.isArray(obj)) return obj.map(coerceNumbers);
+    if (obj !== null && typeof obj === 'object') {
+        const out = { ...obj };
+        for (const key of ['price', 'total_amount']) {
+            if (typeof out[key] === 'string') out[key] = Number(out[key]);
+        }
+        // Recurse into nested arrays/objects (e.g. { products: [...] })
+        for (const [k, v] of Object.entries(out)) {
+            if (Array.isArray(v)) out[k] = v.map(coerceNumbers);
+            else if (v !== null && typeof v === 'object' && !(v instanceof Date)) out[k] = coerceNumbers(v);
+        }
+        return out;
+    }
+    return obj;
+}
+
 async function request(endpoint, options = {}) {
     const token = localStorage.getItem('token');
     const headers = {
@@ -19,7 +38,7 @@ async function request(endpoint, options = {}) {
         throw new Error(data.message || 'Something went wrong');
     }
 
-    return data;
+    return coerceNumbers(data);
 }
 
 // Auth
