@@ -7,8 +7,11 @@
     "start": "node index.js",
     "start:pm2": "pm2 start ecosystem.config.js --env production",
     "dev": "node -r dotenv/config index.js",
-    "dev:seed": "node -r dotenv/config scripts/seed-admin.js",
+    "dev:seed": "node -r dotenv/config scripts/seed-admin.js && node -r dotenv/config scripts/seed-products.js",
+    "dev:seed:admin": "node -r dotenv/config scripts/seed-admin.js",
+    "dev:seed:products": "node -r dotenv/config scripts/seed-products.js",
     "seed:admin": "node scripts/seed-admin.js",
+    "seed:products": "node scripts/seed-products.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
