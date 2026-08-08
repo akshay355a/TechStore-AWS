@@ -3,6 +3,8 @@
 Production Node.js/Express application tier for EC2 behind an internal Application Load Balancer.  
 Also supports local development on **Windows** and **Linux** without any AWS infrastructure.
 
+> 📘 **Full Deployment Guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed local and AWS production deployment instructions.
+
 ## Local Development (Windows / Linux)
 
 ### Prerequisites
