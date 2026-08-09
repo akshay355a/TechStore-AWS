@@ -15,32 +15,7 @@ auditing, and operational notifications.
 
 ## Architecture
 
-``` text
-Internet
-   |
-Route 53
-   |
-Internet-facing ALB :80
-   |
-   +-------------------+
-   |                   |
-Web Tier AZ-A      Web Tier AZ-B
-EC2 + Nginx        EC2 + Nginx
-   |                   |
-   +---------+---------+
-             |
-       Internal ALB :80
-             |
-   +---------+---------+
-   |                   |
-App Tier AZ-A      App Tier AZ-B
-Node.js :4000      Node.js :4000
-   |                   |
-   +---------+---------+
-             |
-        RDS MySQL
-        Multi-AZ
-```
+<img width="4676" height="3308" alt="diagram" src="https://github.com/user-attachments/assets/61cee2da-1674-4814-a5bb-e0c0bb8d5427" />
 
 Supporting services include S3, IAM, AWS Secrets Manager, SSM Session
 Manager, CloudWatch, SNS, CloudTrail, and VPC Flow Logs.
