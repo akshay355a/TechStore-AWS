@@ -15,7 +15,7 @@ auditing, and operational notifications.
 
 ## Architecture
 
-<img width="4676" height="3308" alt="diagram" src="https://github.com/user-attachments/assets/61cee2da-1674-4814-a5bb-e0c0bb8d5427" />
+<img width="4676" height="3308" alt="Architecture" src="https://github.com/user-attachments/assets/5f9f7618-28da-41ca-99cf-f50b7544e6c7" />
 
 Supporting services include S3, IAM, AWS Secrets Manager, SSM Session
 Manager, CloudWatch, SNS, CloudTrail, and VPC Flow Logs.
